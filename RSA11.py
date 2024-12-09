@@ -4,18 +4,19 @@ import sympy as sp  # utilitzem sympy per tots els càlculs
 
 class RSA:
     """classe per claus privades RSA on els n primers entren com a paràmetre"""
-    def __init__(self, p=2, q=3, e=2**16 +1):
+    def __init__(self, p=2, q=3, e=2**16 +1, bits_modul=11):
         # assignem els valors als atributs
         self.e = e
-        self.p, self.q = p, q
+        if not p or not q:
+            self.p, self.q = p, q
+        else:
+            self.p, self.q = self.__find_primes(bits_modul=bits_modul)
         self.n = self.p * self.q # calculem n
-        
+        print(len(str(n)))
+
         phi_n = (self.p - 1) * (self.q - 1)   
         self.k = sp.mod_inverse(self.e, phi_n) # calculem k (d)
         # print(f"k: {self.k}")
-
-    def encrypt(self, m=""):
-        pass
     
     def decrypt(self, C=""):
         L = len(str(self.n))
@@ -39,8 +40,28 @@ class RSA:
             plaintext += chr(ascii_code)
         # print(plaintext)
         return plaintext
+    
+    def pgp(self, m=""):
+        pass
 
+    def __generate_prime(self, lim_inf, lim_sup):
+        while True:
+            p = sp.randprime(lim_inf, lim_sup)
+            if sp.gcd(p-1, self.e) == 1:
+                return p
 
+    def __find_primes(self, bits_modul):
+        """
+        encuentra dos números primeros de longitud bits_modulo/2
+        tq ...
+        """
+        lim_inf, lim_sup = 2**(bits_modul//2 - 1), 2**(bits_modul//2)-1
+        
+        p = self.__generate_prime(lim_inf, lim_sup)
+        q = self.__generate_prime(lim_inf, lim_sup)
+        while p == q:
+            q = self.__generate_prime(lim_inf, lim_sup)          
+        return p, q
     
     def __repr__(self):
         return str(self.__dict__)
@@ -49,30 +70,36 @@ class RSA:
 def factoritza(n):
     return sp.factorint(n).keys()
 
+
+
 def read_file(file_path = "./missatge-encriptat"):
-    """retorna la 3-tupla n, e, P
+    """retorna la 3-tupla n, e, C
     n, e com a int
-    P com a string
+    C com a string
     """
     with open(file=file_path) as f:
         n = f.readline().strip()
         e = f.readline().strip()
-        P = f.readline().strip()
-        return int(n), int(e), P
+        C = f.readline().strip()
+    return int(n), int(e), C
     
 def write_file(file_path):
     pass
 
 if __name__=="__main__":
 
-    n, e, P = read_file()  # llegim el missatge xifrat
+    n, e, C = read_file()  # llegim el missatge xifrat
 
     p, q = factoritza(n=n)  # factoritzem n
 
     rsa = RSA(p=p, q=q, e=e)  # creem un objecte RSA per calcular totes les variables necessaries per RSA
 
-    m = rsa.decrypt(P)  # desxifrem el missatge
+    P = rsa.decrypt(C=C)  # desxifrem el missatge
+
+    # fem un altre objecte RSA amb uns altres números primers per firma PGP
+    pgp = RSA(e=3)
+    # pgp.pgp()
 
     # guardem tots els resultats en un fitxer
-    write_file(file_path="./")
+    # write_file(file_path="./")
 
