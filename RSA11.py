@@ -8,16 +8,14 @@ class RSA:
         # assignem els valors als atributs
         self.e = e
         if not p or not q:
-            self.p, self.q = self.__find_primes(len_modul=len_modul)
+            self.p, self.q, self.n = self.__find_primes(len_modul=len_modul)
         else:
             self.p, self.q = p, q
-            
-        self.n = self.p * self.q # calculem n
-        print(len(str(self.n)), self.n)
+            self.n = self.p * self.q # calculem n
 
         phi_n = (self.p - 1) * (self.q - 1)   
         self.k = sp.mod_inverse(self.e, phi_n) # calculem k (d)
-        # print(f"k: {self.k}")
+
     
     def decrypt(self, C=""):
         L = len(str(self.n))
@@ -33,17 +31,50 @@ class RSA:
         if int(P[:3]) > 254:
             P = "0" + P
 
-        # print(f"Multiple de 3: {len(P)%3==0}")
         # passar a text
         plaintext = ""
         for i in range(0, len(P), 3):
             ascii_code = int(P[i:i + 3])
             plaintext += chr(ascii_code)
-        # print(plaintext)
+
         return plaintext
     
+    def encrypt(self, m=""):
+        # Codifiquem l’alfabet en termes del codi ASCII decimal, usant sempre tres xifres
+        # Expressem el text pla per xifrar en una ´unica string num`erica
+        P = ''.join(f"{ord(c):03d}" for c in m)
+
+        # Tallem en blocs de L-1 digits
+        L = len(str(self.n))
+        block_size = L - 1
+        blocks = [P[i:i + block_size] for i in range(0, len(P), block_size)]
+
+        # Afegim 0 al de la dreta si necessari
+        if len(blocks[-1]) < block_size:
+            blocks[-1] = blocks[-1].ljust(block_size, '0')
+
+        # Xifrem: Ci = Pi^e mod n
+        encrypted_blocks = []
+        for block in blocks:
+            P = int(block)
+            C = pow(P, self.e, self.n)
+            encrypted_blocks.append(f"{C:0{L}d}")
+
+        # concatenar
+        encrypted_message = ''.join(encrypted_blocks)
+        return encrypted_message
+    
     def pgp(self, m=""):
-        pass
+        sign = m
+        sign += "\n"
+        sign += "- - - - - - - - - -PGP- - - - - - - - - -"
+        sign += "\n"
+        sign += str(self.n)
+        sign += "\n"
+        sign += str(self.e)
+        sign += "\n"
+        sign += self.encrypt(m=m)
+        return sign
 
     def __generate_prime(self, lim_inf, lim_sup):
         while True:
@@ -56,13 +87,14 @@ class RSA:
         encuentra dos números primeros de longitud bits_modulo/2
         tq ...
         """
-        lim_inf, lim_sup = 10**(len_modul//2 - 1), 10**(len_modul//2)-1
+        lim_inf, lim_sup = 10**(len_modul // 2 - 1), 10**(len_modul // 2 + 1) - 1
         
-        p = self.__generate_prime(lim_inf, lim_sup)
-        q = self.__generate_prime(lim_inf, lim_sup)
-        while p == q:
-            q = self.__generate_prime(lim_inf, lim_sup)          
-        return p, q
+        while True:
+            p = self.__generate_prime(lim_inf, lim_sup)
+            q = self.__generate_prime(lim_inf, lim_sup)
+            n = p*q
+            if len(str(n))==len_modul and p!=q:
+                return p, q, n
     
     def __repr__(self):
         return str(self.__dict__)
@@ -84,8 +116,9 @@ def read_file(file_path = "./missatge-encriptat"):
         C = f.readline().strip()
     return int(n), int(e), C
     
-def write_file(file_path):
-    pass
+def write_file(file_path="./a", text=""):
+    with open(file=file_path, mode="w") as f:
+        f.write(text)
 
 if __name__=="__main__":
 
@@ -96,16 +129,22 @@ if __name__=="__main__":
     rsa = RSA(p=p, q=q, e=e)  # creem un objecte RSA per calcular totes les variables necessaries per RSA
 
     P = rsa.decrypt(C=C)  # desxifrem el missatge
-    print(P)
+    # print(P)
 
     # fem un altre objecte RSA amb uns altres números primers per firma PGP
     pgp = RSA(e=3)
-    # pgp.pgp()
-
-    # provar longitud = 11
-    while True:
-        RSA(e=3)
+    to_save = "\n".join(["Factors_de_n " + str("_") + " " + str("_"), "Clau_privada_k " + str(rsa.k),"P "+P])
+    signed_text = pgp.pgp(m=to_save)
 
     # guardem tots els resultats en un fitxer
-    # write_file(file_path="./")
+    # write_file(file_path="./missatge-firmat.txt", text=signed_text)
+
+    # confirmem que s'ha firmat bé
+    # n, e, C = read_file(file_path="./check_pgp")
+    # p, q = factoritza(n=n)
+    # rsa = RSA(p=p, q=q, e=e)
+    # P = rsa.decrypt(C=C)
+    # print(P)
+
+
 
