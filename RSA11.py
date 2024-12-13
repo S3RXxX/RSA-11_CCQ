@@ -4,15 +4,16 @@ import sympy as sp  # utilitzem sympy per tots els càlculs
 
 class RSA:
     """classe per claus privades RSA on els n primers entren com a paràmetre"""
-    def __init__(self, p=2, q=3, e=2**16 +1, bits_modul=11):
+    def __init__(self, p=None, q=None, e=2**16 +1, len_modul=11):
         # assignem els valors als atributs
         self.e = e
         if not p or not q:
-            self.p, self.q = p, q
+            self.p, self.q = self.__find_primes(len_modul=len_modul)
         else:
-            self.p, self.q = self.__find_primes(bits_modul=bits_modul)
+            self.p, self.q = p, q
+            
         self.n = self.p * self.q # calculem n
-        print(len(str(n)))
+        print(len(str(self.n)), self.n)
 
         phi_n = (self.p - 1) * (self.q - 1)   
         self.k = sp.mod_inverse(self.e, phi_n) # calculem k (d)
@@ -50,12 +51,12 @@ class RSA:
             if sp.gcd(p-1, self.e) == 1:
                 return p
 
-    def __find_primes(self, bits_modul):
+    def __find_primes(self, len_modul):
         """
         encuentra dos números primeros de longitud bits_modulo/2
         tq ...
         """
-        lim_inf, lim_sup = 2**(bits_modul//2 - 1), 2**(bits_modul//2)-1
+        lim_inf, lim_sup = 10**(len_modul//2 - 1), 10**(len_modul//2)-1
         
         p = self.__generate_prime(lim_inf, lim_sup)
         q = self.__generate_prime(lim_inf, lim_sup)
@@ -95,10 +96,15 @@ if __name__=="__main__":
     rsa = RSA(p=p, q=q, e=e)  # creem un objecte RSA per calcular totes les variables necessaries per RSA
 
     P = rsa.decrypt(C=C)  # desxifrem el missatge
+    print(P)
 
     # fem un altre objecte RSA amb uns altres números primers per firma PGP
     pgp = RSA(e=3)
     # pgp.pgp()
+
+    # provar longitud = 11
+    while True:
+        RSA(e=3)
 
     # guardem tots els resultats en un fitxer
     # write_file(file_path="./")
