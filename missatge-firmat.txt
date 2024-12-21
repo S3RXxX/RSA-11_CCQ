@@ -1,0 +1,12 @@
+Factors_de_n_trobats 103813 125339
+Clau_privada_k 5037215009
+P Un ordinador quàntic és un dispositiu de càlcul que fa ús dels fenòmens específics de la mecànica quàntica, tals com la superposició i l'entrellaçament, per executar operacions sobre dades. Els ordinadors quàntics aprofiten la capacitat dels sistemes quàntics d'estar en dos estats simultàniament. En comptes de fer servir bits que tenen el valor 0 o 1, fan servir qubits (bits quàntics) que tenen una superposició dels dos valors. Processant simultàniament aquestes dades, un ordinador quàntic podria resultar exponencialment més ràpid que un de clàssic. Els ordinadors quàntics de suficient capacitat seran capaços de resoldre càlculs de complexitat intractable per a un ordinador convencional.
+
+La computació quàntica és un paradigma de computació diferent del de la computació clàssica. Es basa en l'ús de qubits en lloc de bits, i dona lloc a noves portes lògiques que fan possibles nous algorismes. Una mateixa tasca pot tenir diferent complexitat en computació clàssica i en computació quàntica, el que ha donat lloc a una gran expectació, ja que alguns problemes intractables passen a ser tractables. Mentre un ordinador clàssic equival a una màquina de Turing, un ordinador quàntic equival a una màquina de turing indeterminista.
+
+Extret de Wikipedia
+
+- - - - - - - - - -PGP- - - - - - - - - -
+14120808727
+3
+1366908065702308021428037520847040702907361406170843092
